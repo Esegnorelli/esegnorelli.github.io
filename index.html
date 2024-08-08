@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - Hora do Pastel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <img src="Logotipo2-01.png" alt="Hora do Pastel" width="100">
+        <form id="infoForm">
+            <input type="text" id="name" name="name" placeholder="Nome" required>
+            <input type="text" id="whatsapp" name="whatsapp" placeholder="WhatsApp" required>
+            <input type="text" id="city" name="city" placeholder="Cidade de Interesse" required>
+            <input type="email" id="email" name="email" placeholder="Email" required>
+            <button type="submit">Cadastrar</button>
+        </form>
+        <div id="successMessage">Cadastro realizado com sucesso!</div>
+    </div>
+    <button id="downloadButton">Exportar Cadastros</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script>
+        document.getElementById('infoForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const whatsapp = document.getElementById('whatsapp').value;
+            const city = document.getElementById('city').value;
+            const email = document.getElementById('email').value;
+
+            let registros = JSON.parse(localStorage.getItem('registros')) || [];
+            registros.push({ name, whatsapp, city, email, reg_date: new Date().toLocaleString() });
+            localStorage.setItem('registros', JSON.stringify(registros));
+
+            document.getElementById('infoForm').reset();
+            document.getElementById('successMessage').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('successMessage').style.display = 'none';
+            }, 3000); // Esconde a mensagem após 3 segundos
+        });
+
+        document.getElementById('downloadButton').addEventListener('click', function () {
+            let registros = JSON.parse(localStorage.getItem('registros')) || [];
+
+            if (registros.length === 0) {
+                alert('Nenhum registro encontrado.');
+                return;
+            }
+
+            const data = [
+                ['Nome', 'WhatsApp', 'Cidade de Interesse', 'Email', 'Data de Registro'],
+                ...registros.map(reg => [reg.name, reg.whatsapp, reg.city, reg.email, reg.reg_date])
+            ];
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(data);
+
+            XLSX.utils.book_append_sheet(wb, ws, 'Cadastros');
+            XLSX.writeFile(wb, 'cadastros.xlsx');
+        });
+    </script>
+</body>
+</html>
